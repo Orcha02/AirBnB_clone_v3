@@ -29,7 +29,8 @@ def specific_place(place_id=None):
     return (jsonify(place.to_dict()), 200)
 
 
-@app_views.route('/places/<place_id>', methods=["DELETE"], strict_slashes=False)
+@app_views.route('/places/<place_id>', methods=["DELETE"],
+                 strict_slashes=False)
 def delete_place(place_id):
     """ Deletes a place by ID """
     place = storage.get(Place, place_id)
@@ -56,13 +57,14 @@ def create_place(city_id):
     user = storage.get(User, req.get('user_id'))
     if not user:
         abort(404)
-    
+
     new_place = Place()
     new_place.city_id = city_id
     for key, value in req.items():
         setattr(new_place, key, value)
     new_place.save()
     return (jsonify(new_place.to_dict()), 201)
+
 
 @app_views.route('/places/<place_id>', methods=["PUT"], strict_slashes=False)
 def update_place(place_id):

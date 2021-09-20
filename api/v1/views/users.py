@@ -17,9 +17,9 @@ def users(user_id=None):
         return jsonify(all_users), 200
     all_users = storage.get(User, user_id)
     if all_users is None:
-        abort (404)
+        abort(404)
     return jsonify(all_users.to_dict()), 200
-    
+
 
 @app_views.route('/users/<user_id>', methods=["DELETE"],
                  strict_slashes=False)
@@ -43,7 +43,7 @@ def post_user():
         abort(400, "Missing email")
     if "password" not in data.keys():
         abort(400, "Missing password")
-    
+
     new_data = User(**data)
     new_data.save()
     return (jsonify(new_data.to_dict()), 201)
