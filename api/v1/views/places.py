@@ -46,7 +46,7 @@ def delete_place(place_id):
 def create_place(city_id):
     """ Creates new place in a city """
     req = request.get_json()
-    if req is False:
+    if req is None:
         abort(400, "Not a JSON")
     if "name" not in req:
         abort(400, "Missing name")

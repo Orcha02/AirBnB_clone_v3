@@ -46,7 +46,7 @@ def delete_review(review_id):
 def create_review(place_id):
     """ Creates new review from a place"""
     req = request.get_json()
-    if req is False:
+    if req is None:
         abort(400, "Not a JSON")
     if "text" not in req:
         abort(400, "Missing text")
