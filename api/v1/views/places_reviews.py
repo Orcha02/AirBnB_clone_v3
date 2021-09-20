@@ -29,7 +29,8 @@ def specific_review(review_id=None):
     return (jsonify(review.to_dict()), 200)
 
 
-@app_views.route('/reviews/<review_id>', methods=["DELETE"], strict_slashes=False)
+@app_views.route('/reviews/<review_id>', methods=["DELETE"],
+                 strict_slashes=False)
 def delete_review(review_id):
     """ Deletes a place by ID """
     review = storage.get(Review, review_id)
@@ -56,13 +57,14 @@ def create_review(place_id):
     user = storage.get(User, req.get('user_id'))
     if not user:
         abort(404)
-    
+
     new_review = Review()
     new_review.place_id = place_id
     for key, value in req.items():
         setattr(new_review, key, value)
     new_review.save()
     return (jsonify(new_review.to_dict()), 201)
+
 
 @app_views.route('reviews/<review_id>', methods=["PUT"], strict_slashes=False)
 def update_review(review_id):
