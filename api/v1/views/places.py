@@ -51,7 +51,7 @@ def create_place(city_id):
     if "name" not in req:
         abort(400, "Missing name")
     if storage.get(City, city_id) is None:
-        abort(404, "city id not found")
+        abort(404)
     if "user_id" not in req:
         abort(400, "Missing user_id")
     user = storage.get(User, req.get('user_id'))
