@@ -4,10 +4,12 @@ from models import storage
 from api.v1.views import app_views
 import flask
 from os import getenv
+from flask_cors import CORS
 
 
 app = flask.Flask(__name__)
 app.register_blueprint(app_views)
+CORS(app, resources={r"/*": {"origins": "0.0.0.0"}})
 
 
 @app.route('/', strict_slashes=False)
@@ -35,3 +37,4 @@ if __name__ == "__main__":
     if HBNB_API_PORT is None:
         HBNB_API_PORT = '5000'
     app.run(debug=True, threaded=True, host=HBNB_API_HOST, port=HBNB_API_PORT)
+
