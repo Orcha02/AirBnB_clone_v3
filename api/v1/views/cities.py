@@ -44,7 +44,7 @@ def delete_city(city_id):
 def create_city(state_id):
     """ Creates new city """
     req = request.get_json()
-    if req is False:
+    if req is None:
         abort(400, "Not a JSON")
     name = req.get("name")
     if "name" not in req:
