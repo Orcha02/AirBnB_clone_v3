@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 """Place_Amenities module of view package"""
 
 from os import getenv
