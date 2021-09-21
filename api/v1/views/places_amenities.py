@@ -1,57 +1,66 @@
 #!/usr/bin/python3
 """Place_Amenities module of view package"""
-
-from os import getenv
 from api.v1.views import app_views
-from flask import jsonify, abort, request
+from flask import jsonify, abort
+from models.place import Place
+from models.amenity import Amenity
+import models
 from models import storage
 
-storage_t = getenv("HBNB_TYPE_STORAGE")
-
-
-@app_views.route("places/<place_id>/amenities", methods=["GET"])
-def get_amenities_of_a_place(place_id=None):
+@app_views.route('/places/<place_id>/amenities',
+                 strict_slashes=False, methods=['GET'])
+def get_amenities_from_place(place_id):
     """Get all amenities of a given id of a place"""
-    obj_place = storage.get("Place", place_id)
-    if obj_place is None:
+    place = storage.get(Place, place_id)
+    if place is None:
         abort(404)
-    list_place_amenities = []
-    for amenities in obj_place.amenities:
-        list_place_amenities.append(amenities.to_dict())
-    return jsonify(list_place_amenities)
+    if models.storage_t == "db":
+        list_res = place.amenities
+    else:
+        list_res = place.amenity_ids
+    return jsonify([amenity.to_dict() for amenity in list_res])
 
 
-@app_views.route("places/<place_id>/amenities/<amenity_id>",
-                 methods=["DELETE", "POST"])
-def create_or_delete_place_amenity(place_id=None, amenity_id=None):
-    """Create or delete a place amenity"""
-    obj_place = storage.get("Place", place_id)
-    obj_amenity = storage.get("Amenity", amenity_id)
-
-    if obj_place is None or obj_amenity is None:
+@app_views.route('/places/<place_id>/amenities/<amenity_id>',
+                 strict_slashes=False, methods=['POST'])
+def create_link_place_amenity(place_id, amenity_id):
+    """Stores a link between a an amenity and a place"""
+    place = models.storage.get(Place, place_id)
+    if not place:
         abort(404)
-
-    if request.method == "DELETE":
-        for amenity in obj_place.amenities:
-            dict_place_amenities = amenity.to_dict()
-            if dict_place_amenities.get("id") == amenity_id:
-                if storage_t == "db":
-                    obj_place.amenities.remove(obj_amenity)
-                else:
-                    obj_place.amenity_ids.remove(amenity_id)
-                storage.save()
-                return jsonify({})
+    amenity = models.storage.get(Amenity, amenity_id)
+    if not amenity:
         abort(404)
+    if models.storage_t == "db":
+        if amenity in place.amenities:
+            return jsonify(amenity.to_dict()), 200
+        place.amenities.append(amenity)
+    else:
+        if amenity_id in place.amenity_ids:
+            return jsonify(amenity.to_dict()), 200
+        place.amenity_ids.append(amenity_id)
+    models.storage.save()
+    return jsonify(amenity.to_dict()), 201
 
-    if request.method == "POST":
-        for amenity in obj_place.amenities:
-            dict_place_amenities = amenity.to_dict()
-            if dict_place_amenities.get("id") == amenity_id:
-                return jsonify(dict_place_amenities)
-        dict_amenity = obj_amenity.to_dict()
-        if storage_t == "db":
-            obj_place.amenities.append(obj_amenity)
-        else:
-            obj_place.amenity_ids.append(dict_amenity.get("id"))
-        storage.save()
-        return jsonify(obj_amenity.to_dict()), 201
+
+@app_views.route('/places/<place_id>/amenities/<amenity_id>',
+                 strict_slashes=False, methods=['DELETE'])
+def delete_link_place_amenity(place_id, amenity_id):
+    """Deletes a link between a place and an amenity and
+    returns an empty JSON"""
+    place = models.storage.get(Place, place_id)
+    if not place:
+        abort(404)
+    amenity = models.storage.get(Amenity, amenity_id)
+    if not amenity:
+        abort(404)
+    if models.storage_t == "db":
+        if amenity not in place.amenities:
+            abort(404)
+        place.amenities.remove(amenity)
+    else:
+        if amenity_id not in place.amenity_ids:
+            abort(404)
+        place.amenity_ids.remove(amenity_id)
+    models.storage.save()
+    return jsonify({}), 200
